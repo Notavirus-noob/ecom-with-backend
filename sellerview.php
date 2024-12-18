@@ -1,19 +1,27 @@
 
 <?php 
 require 'functions.php'; 
-checkLoginStatus();
-$products=getAllProducts();
+if(session_status()=== PHP_SESSION_NONE){
+    session_start();
+
+}
+if(!isset($_SESSION['seller_id'])) {
+    header('location:seller_signuplogin.php');
+  }
+$err=[];
 if (isset($_GET['delid']) && is_numeric($_GET['delid'])) {
     if (getProductById($_GET['delid'])) {
         if(deleteProduct($_GET['delid'])){
-            $error['prod_s'] =  'Product deleted success';
+            $err['prod_s'] =  'Product deleted success';
         } else {
-            $error['prod_f'] = 'product delete Failed';
+            $err['prod_f'] = 'product delete Failed';
         }
     } else {
-        $error['prod_f'] = 'product not found';
+        $err['prod_f'] = 'product not found';
     }
 }
+$products=getAllProducts();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,6 +43,8 @@ if (isset($_GET['delid']) && is_numeric($_GET['delid'])) {
     </section>
 
     <section id="cart" class="section_p1">
+    <?php  echo displayErrorMessage($err,'prod_s'); ?>
+    <?php echo displayErrorMessage($err,'prod_f'); ?>
         <table  width="100%">
             <thead>
                 <tr>
@@ -49,7 +59,7 @@ if (isset($_GET['delid']) && is_numeric($_GET['delid'])) {
             <tbody>
                 <?php $cartsubtotal=0; ?>
                 <?php if (isset($products)): ?>
-                    <?php foreach ($products as $index => $product) { ?>
+                    <?php foreach ($products as $index => $product) { ?> 
                         <tr>
                             <td><a href="sellerview.php?delid=<?php echo $product['prod_id']?>"><i class="bi bi-x-circle"></i></a></td>
                             <td><a href="editProduct.php?edtid=<?php echo $product['prod_id']?>"><i class="bi bi-pencil-fill"></i></a></td>

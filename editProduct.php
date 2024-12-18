@@ -1,6 +1,8 @@
 <?php 
 	require_once 'functions.php';
-    checkLoginStatus();
+  if(!isset($_SESSION['user_id'])) {
+    header('location:seller_signuplogin.php');
+  }
     $err = [];
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (checkRequiredField('product_name')) {

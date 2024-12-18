@@ -1,6 +1,6 @@
 !!readme.txt
 database ko name::bridge_courier
-CREATE TABLE productdetetails(
+CREATE TABLE proddet(
 	id int PRIMARY KEY AUTO_INCREMENT,
     image varchar(100),
     prodname varchar(100),

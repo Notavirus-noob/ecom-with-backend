@@ -1,11 +1,5 @@
 <?php 
 	require_once 'functions.php';
-   if(!session_status()==PHP_SESSION_NONE){
-    session_start();
-    if(!$_SESSION['status']){
-        header('location:cart.php?error=Logout first');
-    } 
-    }
 $err = [];
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['signup'])) {
@@ -93,21 +87,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $err['email_login'] = 'Enter email';
         }
 
-    }
-    if (checkRequiredField('pwd_login')) {
-        $pwd_login = $_POST['pwd_login'];
-        
-    } else {
-        $err['pwd_login'] = 'Enter pwd';
-    }
-    if(count($err) == 0){
-        $form_origin = $_POST['form_origin']; // Origin from hidden field
-        $check=checkData($email_login,$pwd_login,$form_origin);
-        if(!$check){
-            $err['invalid']='email or password wrong';
+        if (checkRequiredField('pwd_login')) {
+            $pwd_login = $_POST['pwd_login'];
+            
+        } else {
+            $err['pwd_login'] = 'Enter pwd';
         }
-
-    }  
+        if(count($err) == 0){
+            $form_origin = $_POST['form_origin']; // Origin from hidden field
+            $check=checkData($email_login,$pwd_login,$form_origin);
+            if(!$check){
+                $err['invalid']='email or password wrong';
+            }
+        }  
+    }
 }
 ?>
 <!DOCTYPE html>

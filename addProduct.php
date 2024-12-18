@@ -1,11 +1,6 @@
 <?php 
 	require_once 'functions.php';
-    if(session_status()=== PHP_SESSION_NONE){
-        session_start();
-    }
-  if(!isset($_SESSION['seller_id'])) {
-    header('location:seller_signuplogin.php');
-  }
+   
     $err = [];
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (checkRequiredField('product_name')) {
@@ -103,13 +98,39 @@
     <!--Product data add -->
     <div class="container">
         <div class="main">  	
-            <?php if (isset($user)): ?>
-                <h2 class="text-center">Welcome <?php echo htmlspecialchars($user['username']) ; ?>.</h2>
-            <?php endif; ?>
-            <button onclick="location.href='addProduct.php'">Add Product</button>
-            <button onclick="location.href='sellerview.php'">View Product</button>
-            
-				
+            <h2 class="text-center">Add Product</h2>
+            <div class="Addproduct">
+                    <form method="post" action="<?php $_SERVER['PHP_SELF'] ?>" id="addProduct">
+						<input type="text" name="product_name" id="product_name" placeholder="product name" value="<?php echo isset($_POST['product_name']) ? $_POST['product_name'] : ''; ?>">
+						<?php  echo displayErrorMessage($err,'product_name')?>
+						<input type="text" name="proddesc" id="proddesc" placeholder="product Description" value="<?php echo isset($_POST['proddesc']) ? $_POST['proddesc'] : ''; ?>">
+						<?php  echo displayErrorMessage($err,'proddesc')?>
+						<input type="number" name="price" id="price" placeholder="price" value="<?php echo isset($_POST['price']) ? $_POST['price'] : ''; ?>">
+						<?php  echo displayErrorMessage($err,'price')?>
+						<input type="number" name="quantity" id="quantity" placeholder="quantity" value="<?php echo isset($_POST['quantity']) ? $_POST['quantity'] : ''; ?>">
+						<?php  echo displayErrorMessage($err,'quantity')?>
+                        <div id="featured">
+                            <span for="f_stat" id="fname">featured product</span>
+                            <input type="radio" name="f_stat" value="0" checked><span>Don't add</span>
+                            <input type="radio" name="f_stat" value="1"><span>Add</span>
+                        </div>
+                        <div id="New_arrival">
+                            <span for="na_stat" id="na_name">New Arrival</span>
+                            <input type="radio" name="na_stat" value="0" checked><span>Don't add</span>
+                            <input type="radio" name="na_stat" value="1"><span>Add</span>
+                        </div>
+                        <div id="image_div">
+                            <span for="image" id="img_name">Image</span>
+                            <input type="file" name="image" id="image">
+                        </div>
+
+						<button type="submit" name="addproduct">Add Product</button>
+                        <div class="msg">
+                            <?php  echo displaySuccessMessage($err,'success')?>
+                            <?php  echo displayErrorMessage($err,'failed')?>
+                        </div>
+					</form>
+				</div>
 		</div>
 	</div>
 	<?php require "footer.php"; ?>

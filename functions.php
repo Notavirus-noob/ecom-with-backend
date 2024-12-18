@@ -106,84 +106,67 @@
                     "SELECT * FROM user_credentials WHERE email='%s' limit 1", 
                     $connect->real_escape_string($email_login)
                 );
-            }
-            else if($form_origin=='seller_form'){
-                $sql = sprintf(
-                    "SELECT * FROM seller_credentials WHERE email='%s' limit 1", 
-                    $connect->real_escape_string($email_login)
-                );
-            }
-            $result = $connect->query($sql);
-            if ($result->num_rows > 0) {
-                //fetch data
-                $user= $result->fetch_assoc();
+                $result = $connect->query($sql);
+                $user = $result->fetch_assoc();
                 if($user){
                     if(password_verify($pwd_login,$user['password'])){
                         session_start();
                         session_regenerate_id();
                         $_SESSION['user_id']=$user['id'];
-                        $_SESSION['status']=$user['status'];
-                        if($form_origin=='user_form'){
-                            header('location:cart.php');
-                            exit;
-                        }
-                        else if($form_origin=='seller_form'){
-                            if($user['status']=='active'){
-                                header('location:sellerdashboard.php');
-                                exit;
-                            }else{
-                                die("Your account is not active. Please contact the admin.");   
-                            }
-                        }
-
-                    }
-                    else {
-                        return false;
+                        header('location:cart.php');
+                        
                     }
                 }
+                return false;
+                
             }
-            else{
+            elseif($form_origin=='seller_form'){
+                $sql = sprintf(
+                    "SELECT * FROM seller_credentials WHERE email='%s' limit 1", 
+                    $connect->real_escape_string($email_login)
+                );
+                $result = $connect->query($sql);
+                $seller = $result->fetch_assoc();
+                if($seller){
+                    if(password_verify($pwd_login,$seller['password'])){
+                        session_start();
+                        session_regenerate_id();
+                        $_SESSION['seller_id']=$seller['id'];
+                        $_SESSION['status']=$seller['status'];
+                        if($seller['status']=='active'){
+                            header('location:sellerdashboard.php');
+                            exit;
+                        }else{
+                            die("Your account is not active. Please contact the admin.");   
+                        }
+                    }
+                }
                 return false;
             }
-            return true;
+            elseif($form_origin=='admin_form'){
+                $sql = sprintf(
+                    "SELECT * FROM admin WHERE email='%s' limit 1", 
+                    $connect->real_escape_string($email_login)
+                );
+                $result = $connect->query($sql);
+                $admin = $result->fetch_assoc();
+                if($admin){
+                    if(hash('sha256',$pwd_login)==$admin['password']){
+                        session_start();
+                        session_regenerate_id();
+                        $_SESSION['admin_id']=$admin['admin_id'];
+                        header('location:admin_dashboard.php');
+                        exit;
+                    }
+                }
+                return false;
+            }
+            return false;
         } catch (\Throwable $th) {
            die('Error: ' . $th->getMessage());
         }
     }
-
-    function startSession() {
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
-        if(isset($_SESSION['user_id'])){
-            if($_SESSION['user_id']){
-                try {
-                    $connect = new mysqli('localhost','root','','bridge_courier');
-                    if(!$_SESSION['status']){
-                        $sql="SELECT * FROM user_credentials WHERE id={$_SESSION['user_id']} ";
-                        $result=$connect->query($sql);
-                        $user=$result ->fetch_assoc();
-                        return $user;
-                    }
-                    else  if($_SESSION['status']=='active'){
-                        $sql="SELECT * FROM seller_credentials WHERE id={$_SESSION['user_id']} AND status='active'";
-                        $result=$connect->query($sql);
-                        $user=$result ->fetch_assoc();
-                        return $user;
-                    }
-                }
-                catch (\Throwable $th) {
-                   die('Error: ' . $th->getMessage());
-                }
-            }else{
-                return false;
-            }
-        }
-        else{
-            return false;
-        }
-    }
-
+  
     function printStatus($status)  {
         if ($status == 1) {
             return 'Active';
@@ -212,7 +195,7 @@
     
     function getProductById($id){
         try {
-            $connect = new mysqli('localhost','root','','bridge_courier');
+            $connect = new mysqli( 'localhost','root','','bridge_courier');
             $sql = "select * from productdetails where prod_id=$id";
             $result = $connect->query($sql);
             if ($result->num_rows == 1) {
@@ -258,16 +241,135 @@
         }
     }
 
-    function  checkLoginStatus(){
-        if (session_status() == PHP_SESSION_NONE) {
-        session_start();
+
+    function getCount(){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $userQuery = "SELECT COUNT(*) as count FROM user_credentials";
+            $sellerQuery = "SELECT COUNT(*) as count FROM seller_credentials";
+            $pendingSellerQuery = "SELECT COUNT(*) as count FROM seller_credentials WHERE status = 'pending'";
+            $activeSellerQuery = "SELECT COUNT(*) as count FROM seller_credentials WHERE status = 'active'";
+
+            $userCount = $connect->query($userQuery)->fetch_assoc()['count'];
+            $sellerCount = $connect->query($sellerQuery)->fetch_assoc()['count'];
+            $pendingSellerCount = $connect->query($pendingSellerQuery)->fetch_assoc()['count'];
+            $activeSellerCount = $connect->query($activeSellerQuery)->fetch_assoc()['count'];
+
+            return [
+                'userCount' => $userCount,
+                'sellerCount' => $sellerCount,
+                'activeSellerCount' => $activeSellerCount,
+                'pendingSellerCount' => $pendingSellerCount
+            ];
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
         }
-        if (!isset($_SESSION['user_id'] )) {
-            header('location:user_signuplogin.php');
-            if (!isset($_SESSION['status'])) {
-                header('location:seller_signuplogin.php');
+    }
+  
+    function getSellers(){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "select * from seller_credentials";
+            $result = $connect->query($sql);
+            $sellers = [];
+            if ($result->num_rows > 0) {
+                //fetch products
+                while ($record= $result->fetch_assoc()) {
+                    array_push($sellers,$record);
+                }
             }
+            return $sellers;
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
         }
     }
 
+    function getUsers(){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "select * from user_credentials";
+            $result = $connect->query($sql);
+            $users = [];
+            if ($result->num_rows > 0) {
+                //fetch products
+                while ($record= $result->fetch_assoc()) {
+                    array_push($users,$record);
+                }
+            }
+            return $users;
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
+
+    function getSellerById($id){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "select * from seller_credentials where id=$id";
+            $result = $connect->query($sql);
+            if ($result->num_rows == 1) {
+                $record = $result->fetch_assoc();
+                return $record;
+            }
+            return false;
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
+    function getUserById($id){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "select * from user_credentials where id=$id";
+            $result = $connect->query($sql);
+            if ($result->num_rows == 1) {
+                $record = $result->fetch_assoc();
+                return $record;
+            }
+            return false;
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
+    function deleteSeller($del_id){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "delete from seller_credentials where seller_id=$del_id";
+            $connect->query($sql);
+            if ($connect->affected_rows == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
+    function deleteUser($del_id){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "delete from user_credentials where id=$del_id";
+            $connect->query($sql);
+            if ($connect->affected_rows == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
+   function getAdminById($id){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "select * from admin where admin_id=$id";
+            $result = $connect->query($sql);
+            if ($result->num_rows == 1) {
+                $record = $result->fetch_assoc();
+                return $record;
+            }
+            return false;
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
 ?>
