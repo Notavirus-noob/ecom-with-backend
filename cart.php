@@ -102,8 +102,12 @@ if(isset($_SESSION['user_id'])){
                     
                 </tr>
             </table>
-            <a href="checkout.php?user_id=<?php $_SESSION['user_id'] ?>"></a>
-            <button class="normal">Procced to Checkout</button>
+            <?php if (isset($user)): ?>
+            <a href="checkout.php?user_id=<?php $user ?>"> <button class="normal">Procced to Checkout</button></a>
+            <?php else: ?>
+                <a href="#" onclick="alert('Login First!!')"> <button class="normal">Procced to Checkout</button></a>
+            <?php endif; ?>
+           
         </div>
     </section>
     <?php require "footer.php"; ?>
