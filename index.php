@@ -88,16 +88,9 @@ $products = getAllProducts();
                         <img src="img/products/<?php echo $product['image']?>" alt="<?php $product['prodname'] ?>">
                         <div class="des">
                             <h5><?php echo $product['prodname'] ?></h5>
-                            <div class="star">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                                <i class="bi bi-star"></i>
-                            </div>
-                            <h4>&dollar;<?php echo $product['price'] ?></h4>
+                            <h4>Npr:<?php echo $product['price'] ?></h4>
                         </div>
-                        <a href="shop.php"><i class="bi bi-cart cart"></i></a>
+                        <a href="sproduct.php?id=<?php echo $product['prod_id'] ?>"><i class="bi bi-cart cart"></i></a>
                     </div>
                 <?php } ?>
             <?php } ?>
@@ -121,16 +114,9 @@ $products = getAllProducts();
                         <img src="img/products/<?php echo $product['image']?>" alt="<?php $product['prodname'] ?>">
                         <div class="des">
                             <h5><?php echo $product['prodname'] ?></h5>
-                            <div class="star">
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-fill"></i>
-                                <i class="bi bi-star-half"></i>
-                                <i class="bi bi-star"></i>
-                            </div>
-                            <h4><?php echo $product['price'] ?></h4>
+                            <h4>Npr: <?php echo $product['price'] ?></h4>
                         </div>
-                        <a href="shop.php"><i class="bi bi-cart cart"></i></a>
+                        <a href="sproduct.php?id=<?php echo $product['prod_id'] ?>"><i class="bi bi-cart cart"></i></a>
                     </div>
                 <?php } ?>
             <?php } ?>
@@ -165,17 +151,6 @@ $products = getAllProducts();
         <div class="banner-box banner-box3">
             <h2>T-Shirts</h2>
             <h3>New Trendy Styles</h3>
-        </div>
-    </section>
-
-    <section id="newsletter" class="section_p1 section_m1">
-        <div class="newstext">
-            <h4>Sign Up for newsletter</h4>
-            <p>Get E-mail updates about our latest shop and <span>special offers.</span></p>
-        </div>
-        <div class="form">
-            <input type="text" placeholder="Your email address">
-            <button class="normal">Sign Up</button>
         </div>
     </section>
     <?php require "footer.php"; ?>

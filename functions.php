@@ -62,7 +62,6 @@
             return true;
         } else {
             return false;
-
         }
         }catch(Exception $ex){
             if (str_contains($ex->getMessage(), "Duplicate entry") && str_contains($ex->getMessage(), "for key 'username'")) {
@@ -81,8 +80,11 @@
     }
     function addProduct($product_name,$proddesc,$price,$quantity,$image,$f_stat,$na_stat){
         try{
+            if(session_status()== PHP_SESSION_NONE){
+                session_start();
+            }
             $connection = mysqli_connect('localhost','root','','bridge_courier');          
-            $created_by= $_SESSION['user_id'];
+            $created_by= $_SESSION['seller_id'];
             $cdate = date('Y-m-d H:i:s');
             $insertsql = "INSERT INTO productdetails(prodname,prod_desc, image,price, quantity,f_stat,na_stat,created_by,created_at) VALUES('$product_name','$proddesc','$image',$price,$quantity,$f_stat,$na_stat,$created_by,'$cdate')";
             mysqli_query($connection,$insertsql);
@@ -95,8 +97,27 @@
             echo "Database error: " . $ex->getMessage();
         }
     }
-
-    
+    function addToCart($product_name, $price, $size, $quantity,$image) {
+        try {
+            if(session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+            $connection = mysqli_connect('localhost', 'root', '', 'bridge_courier');          
+            $user_id = $_SESSION['user_id'];
+            $insertsql = "INSERT INTO cart(product_name, price, size, quantity, user_id,image) VALUES(?, ?, ?, ?, ?,?)";
+            $stmt = $connection->prepare($insertsql);
+            $stmt->bind_param("sdsiis", $product_name, $price, $size, $quantity, $user_id,$image);
+            $stmt->execute();
+            
+            if ($connection->insert_id > 0 && $connection->affected_rows == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch(Exception $ex) {
+            echo "Database error: " . $ex->getMessage();
+        }
+    }    
     function checkData($email_login,$pwd_login,$form_origin){
         try {
             $connect = new mysqli('localhost','root','','bridge_courier');
@@ -207,6 +228,20 @@
            die('Error: ' . $th->getMessage());
         }
     }
+    function getCartById($id){
+        try {
+            $connect = new mysqli( 'localhost','root','','bridge_courier');
+            $sql = "select * from cart where id=$id";
+            $result = $connect->query($sql);
+            if ($result->num_rows == 1) {
+                $recordById= $result->fetch_assoc();
+                return $recordById;
+            }
+            return false;
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
     
     
     function deleteProduct($del_id){
@@ -223,15 +258,33 @@
            die('Error: ' . $th->getMessage());
         }
     }
+    function deleteCart($del_id){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "delete from cart where id=$del_id";
+            $connect->query($sql);
+            if ($connect->affected_rows == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
     
     function updateProduct($product_name,$proddesc,$price,$quantity,$image,$f_stat,$na_stat,$edtid){
         try {
+            if(session_status()==PHP_SESSION_NONE) {
+                session_start();
+            }
             $connect = new mysqli('localhost','root','','bridge_courier');
-            $updated_at = date('Y-m-d H:i:s');
-            $updated_by= $_SESSION['user_id'];
-            $sql = "update productdetails set prodname='$product_name', prod_desc='$proddesc',price=$price,quantity=$quantity,image='$image',f_stat=$f_stat,na_stat=$na_stat,updated_by=$updated_by,updated_at=$updated_at where prod_id=$edtid";
+            $cdate = date('Y-m-d H:i:s');
+            $modified_by= $_SESSION['seller_id'];
+            $sql = "update productdetails set prodname='$product_name', prod_desc='$proddesc', price=$price, quantity=$quantity, image='$image', f_stat=$f_stat, na_stat=$na_stat, modified_by=$modified_by, modified_at='$cdate' where prod_id=$edtid";           
             $connect->query($sql);
             if ($connect->affected_rows == 1) {
+                header('location:sellerview.php');
                 return true;
             } else {
                 return false;
@@ -368,6 +421,23 @@
                 return $record;
             }
             return false;
+        } catch (\Throwable $th) {
+           die('Error: ' . $th->getMessage());
+        }
+    }
+    function getAllCart($id){
+        try {
+            $connect = new mysqli('localhost','root','','bridge_courier');
+            $sql = "select * from cart where user_id=$id";
+            $result = $connect->query($sql);
+            $cart = [];
+            if ($result->num_rows > 0) {
+                //fetch products
+                while ($record= $result->fetch_assoc()) {
+                    array_push($cart,$record);
+                }
+            }
+            return $cart;
         } catch (\Throwable $th) {
            die('Error: ' . $th->getMessage());
         }

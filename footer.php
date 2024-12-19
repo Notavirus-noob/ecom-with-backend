@@ -1,4 +1,4 @@
-<footer class="section_p1">
+<footer class="section_p1 borderup">
         <div class="col">
             <a href="index.php">
                 <img class="logo" src="img/logo.png" alt="logo">

@@ -37,11 +37,6 @@ $products=getAllProducts();
         <?php require "navbar.php"; ?>
     </section>
 
-    <section id="page-header" class="about-header">
-        <h2>#Let's talk</h2>
-        <p>LEAVE A MESSAGE,We love to hear from you!</p>
-    </section>
-
     <section id="cart" class="section_p1">
     <?php  echo displayErrorMessage($err,'prod_s'); ?>
     <?php echo displayErrorMessage($err,'prod_f'); ?>

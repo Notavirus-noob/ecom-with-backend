@@ -1,6 +1,12 @@
 <?php 
 	require_once 'functions.php';
-   
+    if(session_start()===PHP_SESSION_NONE){
+        session_start();
+    }
+    if (!isset($_SESSION['seller_id'])) {
+        header('location:seller_signuplogin.php');
+        exit();
+    }
     $err = [];
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (checkRequiredField('product_name')) {
@@ -54,7 +60,6 @@
         } else {
             $err['quantity'] = 'Enter quantity';
         }
-
         if (checkRequiredField('image')) {
 
             if (matchPattern($_POST['image'],"/^[a-zA-Z0-9_\-]+\.(jpg|jpeg|png|gif)$/i")){
@@ -67,6 +72,7 @@
         } else {
             $err['image'] = 'Enter image';
         }
+
         $f_stat= $_POST['f_stat'];
         $na_stat= $_POST['na_stat'];
 
@@ -123,6 +129,7 @@
                             <span for="image" id="img_name">Image</span>
                             <input type="file" name="image" id="image">
                         </div>
+                        <?php  echo displayErrorMessage($err,'image')?>
 
 						<button type="submit" name="addproduct">Add Product</button>
                         <div class="msg">

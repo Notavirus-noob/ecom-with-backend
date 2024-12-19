@@ -1,6 +1,9 @@
 <?php 
 	require_once 'functions.php';
-  if(!isset($_SESSION['user_id'])) {
+    if(session_start()=== PHP_SESSION_NONE){
+        session_start();}
+
+  if(!isset($_SESSION['seller_id'])) {
     header('location:seller_signuplogin.php');
   }
     $err = [];
@@ -57,32 +60,36 @@
             $err['quantity'] = 'Enter quantity';
         }
 
-        if (checkRequiredField('image')) {
-
-            if (matchPattern($_POST['image'],"/^[a-zA-Z0-9_\-]+\.(jpg|jpeg|png|gif)$/i")){
-                $image = $_POST['image'];
-            }
-            else{
-                $err['image'] = 'Enter Valid image';
-            }
-
-        } else {
-            $err['image'] = 'Enter image';
-        }
         $f_stat= $_POST['f_stat'];
         $na_stat= $_POST['na_stat'];
+        $image_new= $_POST['image_n'];
+        $image_old= $_POST['image_o'];
+
+        if($image_new!=""){
+            $image= $image_new;
+            if($image_new===$image_old){
+                $err['image']='File already exist';
+            }
+            else{
+                $image= $_POST['image_n'];
+            }
+        }
+        else{
+            $image= $image_old;
+        }
         
         if(count($err) == 0){
             if (updateProduct($product_name,$proddesc,$price,$quantity,$image,$f_stat,$na_stat,$_GET['edtid'])) {
-                $err['success'] = 'Add Product Success';   
+                $err['success'] = 'Edit Product Success';   
             } else {
-                $err['failed'] = 'Product add failed';
+                $err['failed'] = 'Product Edit failed';
             }
             
         }  
     }
     if (isset($_GET['edtid']) && is_numeric($_GET['edtid'])) {
         $product = getProductById($_GET['edtid']);
+        print_r($product);
         if (!$product) {
             die('Category not found');
         }
@@ -105,13 +112,10 @@
     <!--Product data add -->
     <div class="container">
         <div class="main">  	
-            <?php if (isset($user)): ?>
-                <h2 class="text-center">Welcome <?php echo htmlspecialchars($user['username']) ; ?>.</h2>
-                <h3 class="text-center"> Lets get to work :&#41;</h3>
-            <?php endif; ?>
+                <h2 class="text-center">Edit Product</h2>
 
 				<div class="EditProduct">
-                    <form method="post" action="<?php $_SERVER['PHP_SELF'] ?>" id="edtProduct">
+                    <form method="post" action="<?php $_SERVER['PHP_SELF'] ?>" id="edtProduct" >
 						<input type="text" name="product_name" id="product_name" placeholder="product name" value="<?php echo $product['prodname'] ?>">
 						<?php  echo displayErrorMessage($err,'product_name')?>
 						<input type="text" name="proddesc" id="proddesc" placeholder="product Description" value="<?php  echo $product['prod_desc']?>">
@@ -119,31 +123,34 @@
 						<input type="number" name="price" id="price" placeholder="price" value="<?php  echo $product['price'] ?>">
 						<?php  echo displayErrorMessage($err,'price')?>
 						<input type="number" name="quantity" id="quantity" placeholder="quantity" value="<?php echo $product['quantity']  ?>">
-						<?php  echo displayErrorMessage($err,'quantity')?>
+                        <?php  echo displayErrorMessage($err,'quantity')?>
                         <div id="featured">
                             <span for="f_stat" id="fname" >featured product</span>
                             <?php if($product['f_stat'] == 0){ ?>
-                            <input type="radio" name="f_stat" value="0" checked><span>Don't add</span>
-                            <input type="radio" name="f_stat" value="1"><span>Add</span>
-                            <?php }else{ ?>
-                                <input type="radio" name="f_stat" value="0"><span>Don't add</span>
-                                <input type="radio" name="f_stat" value="1"checked><span>Add</span>
-                            <?php } ?>
+                                <input type="radio" name="f_stat" value="0" checked><span>Don't add</span>
+                                <input type="radio" name="f_stat" value="1"><span>Add</span>
+                                <?php }else{ ?>
+                                    <input type="radio" name="f_stat" value="0"><span>Don't add</span>
+                                    <input type="radio" name="f_stat" value="1"checked><span>Add</span>
+                                    <?php } ?>
                         </div>
                         <div id="New_arrival">
-                            <span for="na_stat" id="na_name" value="<?php echo $product['na_stat'] ; ?>">New Arrival</span>
-                            <?php if($product['na_stat'] == 0){ ?>
-                            <input type="radio" name="na_stat" value="0" checked><span>Don't add</span>
-                            <input type="radio" name="na_stat" value="1"><span>Add</span>
-                            <?php }else{ ?>
-                                <input type="radio" name="na_stat" value="0"><span>Don't add</span>
-                                <input type="radio" name="na_stat" value="1" checked><span>Add</span>
-                            <?php } ?>
+                                    <span for="na_stat" id="na_name" value="<?php echo $product['na_stat'] ; ?>">New Arrival</span>
+                                    <?php if($product['na_stat'] == 0){ ?>
+                                        <input type="radio" name="na_stat" value="0" checked><span>Don't add</span>
+                                        <input type="radio" name="na_stat" value="1"><span>Add</span>
+                                        <?php }else{ ?>
+                                            <input type="radio" name="na_stat" value="0"><span>Don't add</span>
+                                            <input type="radio" name="na_stat" value="1" checked><span>Add</span>
+                                            <?php } ?>
                         </div>
                         <div id="image_div">
-                            <span for="image" id="img_name">Image</span>
-                            <input type="file" name="image" id="image" value="<?php echo $product['image'] ?>">
+                                            <span for="image" id="img_name">Image</span>
+                                            <img src="img/products/<?php echo $product['image'] ?>" alt="product image" width="50px" height="50px" id="img"><br/>
+                                            <input type="file" name="image_n" id="image_new" >
+                                            <input type="hidden" name="image_o" value="<?php echo $product['image'] ; ?>" id="image_old">
                         </div>
+                                        <?php  echo displayErrorMessage($err,'image')?>
 
 						<button type="submit" name="editProduct">Edit Product</button>
                         <div class="msg">

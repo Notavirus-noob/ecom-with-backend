@@ -1,11 +1,27 @@
 
 <?php 
 require 'functions.php'; 
-if(!session_status()==PHP_SESSION_NONE){
+if(session_status()==PHP_SESSION_NONE){
     session_start();
-    if($_SESSION['status']){
-        header('location:sellerdashboard.php?error=Access Denied');
+}
+if(isset($_SESSION['seller_id'])){
+    header('location:sellerdashboard.php?error=Access Denied');
+}
+
+if (isset($_GET['delid']) && is_numeric($_GET['delid'])) {
+    if (getCartById($_GET['delid'])) {
+        if(deleteCart($_GET['delid'])){
+            $err['success'] =  'Cart deleted success';
+        } else {
+            $err['failed'] = 'Cart delete Failed';
+        }
+    } else {
+        $err['failed'] = 'product not found';
     }
+}
+if(isset($_SESSION['user_id'])){
+    $user = getUserById($_SESSION['user_id']);
+    $carts = getAllCart($_SESSION['user_id']);
 }
 ?>
 <!DOCTYPE html>
@@ -40,23 +56,25 @@ if(!session_status()==PHP_SESSION_NONE){
                     <td>Remove</td>
                     <td>Image</td>
                     <td>Product</td>
+                    <td>Size</td>
                     <td>Price</td>
                     <td>Quantity</td>
                     <td>SubTotal</td>
                 </tr>
             </thead>
             <tbody>
-                <?php $cartsubtotal=0; ?>
-                <?php if (isset($users)): ?>
-                    <?php foreach ($users as $index => $user) { ?>
+                <?php $final=0; ?>
+                <?php if (isset($carts)): ?>
+                    <?php foreach ($carts as $index => $cart) { ?>
                         <tr>
-                            <td><a href="del_connection.php?id=<?php echo $user['id'] ?>"><i class="bi bi-x-circle"></i></a></td>
-                            <td><img src="<?php echo $user['image'] ?>" alt="<?php $user['prodname'] ?>"></td>
-                            <td><?php echo $user['prodname'] ?></td>
-                            <td><?php echo $user['price'] ?></td>
-                            <td><?php echo $user['quantity'] ?></td>
-                            <td><?php echo $subtotal=($user['price']*$user['quantity']) ?></td>
-                            <?php $cartsubtotal+=$subtotal?>
+                        <td><a href="cart.php?delid=<?php echo $cart['id']?>"><i class="bi bi-x-circle"></i></a></td>
+                            <td><img src="img/products/<?php echo $cart['image'] ?>" alt="<?php echo $cart['product_name'] ?>"></td>
+                            <td><?php echo $cart['product_name'] ?></td>
+                            <td><?php echo $cart['size'] ?></td>
+                            <td><?php echo $cart['price'] ?></td>
+                            <td><?php echo $cart['quantity'] ?></td>
+                            <td><?php echo $cart['total'] ?></td>
+                            <?php $final += $cart['total']; ?>
                         </tr>
                     <?php } ?>
                 <?php endif; ?>
@@ -65,19 +83,14 @@ if(!session_status()==PHP_SESSION_NONE){
     </section>
 
     <section id="cart-add" class="section_p1">
-        <div id="coupon">
-            <h3>Apply Coupon</h3>
-            <div>
-                <input type="text" placeholder="Enter your Coupon">
-                <button class="normal">Apply</button>
-            </div>
+        <div>
         </div>
         <div id="subtotal">
             <h3>Cart Total</h3>
             <table>
                 <tr>
                     <td>Cart SubTotal</td>
-                    <td><strong>Rs: <?php echo $cartsubtotal ?></strong></td>
+                    <td><strong>Rs: <?php echo $final ?></strong></td>
                 </tr>
                 <tr>
                     <td>Shipping</td>
@@ -85,9 +98,11 @@ if(!session_status()==PHP_SESSION_NONE){
                 </tr>
                 <tr>
                     <td><strong>Total</strong></td>
-                    <td><strong>Rs: <?php echo $cartsubtotal ?></strong></td>
+                    <td><strong>Rs: <?php echo $final ?></strong></td>
+                    
                 </tr>
             </table>
+            <a href="checkout.php?user_id=<?php $_SESSION['user_id'] ?>"></a>
             <button class="normal">Procced to Checkout</button>
         </div>
     </section>

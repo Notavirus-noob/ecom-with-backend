@@ -49,17 +49,6 @@ $products = getAllProducts();
         <a href="#">3</a>
         <a href="#"><i class="bi bi-arrow-right"></i></a>
     </section>
-
-    <section id="newsletter" class="section_p1 section_m1">
-        <div class="newstext">
-            <h4>Sign Up for newsletter</h4>
-            <p>Get E-mail updates about our latest shop and <span>special offers.</span></p>
-        </div>
-        <div class="form">
-            <input type="text" placeholder="Your email address">
-            <button class="normal">Sign Up</button>
-        </div>
-    </section>
     <?php require "footer.php"; ?>
   
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
